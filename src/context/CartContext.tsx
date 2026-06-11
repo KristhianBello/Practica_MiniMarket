@@ -1,3 +1,7 @@
+/**
+ * Estado global del carrito de compras (Context API + AsyncStorage).
+ * Criterio de la rúbrica: estado compartido entre pantallas con persistencia local.
+ */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   createContext,
@@ -11,7 +15,7 @@ import {
 import Toast from 'react-native-toast-message';
 
 import { CartItem, Product } from '@/types';
-import { getItemCount, getTotal } from '@/utils/cartHelpers';
+import { getAvailableStock, getCartQuantity, getItemCount, getTotal } from '@/utils/cartHelpers';
 
 const STORAGE_KEY = '@minimarket_cart';
 
@@ -25,6 +29,8 @@ type CartContextType = {
   clearCart: () => void;
   getTotal: () => number;
   getItemCount: () => number;
+  getCartQuantity: (productId: number) => number;
+  getAvailableStock: (productId: number, totalStock: number) => number;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -59,20 +65,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [cart, isLoading]);
 
   const addToCart = useCallback((product: Product) => {
-    if (product.stock <= 0) {
-      Toast.show({ type: 'error', text1: 'Producto sin stock disponible' });
-      return;
-    }
-
     setCart((prev) => {
+      const inCart = getCartQuantity(prev, product.id);
+      const available = product.stock - inCart;
+
+      if (available <= 0) {
+        Toast.show({ type: 'error', text1: 'Stock máximo alcanzado' });
+        return prev;
+      }
+
       const existing = prev.find((item) => item.id === product.id);
 
       if (existing) {
-        if (existing.quantity >= product.stock) {
-          Toast.show({ type: 'error', text1: 'Stock máximo alcanzado' });
-          return prev;
-        }
-
         Toast.show({ type: 'success', text1: 'Producto agregado', text2: product.name });
         return prev.map((item) =>
           item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
@@ -141,6 +145,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       clearCart,
       getTotal: () => getTotal(cart),
       getItemCount: () => getItemCount(cart),
+      getCartQuantity: (productId: number) => getCartQuantity(cart, productId),
+      getAvailableStock: (productId: number, totalStock: number) =>
+        getAvailableStock(cart, productId, totalStock),
     }),
     [
       cart,

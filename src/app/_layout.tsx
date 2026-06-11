@@ -1,3 +1,5 @@
+import 'react-native-reanimated';
+
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import Toast from 'react-native-toast-message';
@@ -12,7 +14,11 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="product/[id]"
-          options={{ title: 'Detalle del producto', headerBackTitle: 'Volver' }}
+          options={{
+            title: 'Detalle del producto',
+            headerBackTitle: 'Volver',
+            headerBackVisible: true,
+          }}
         />
         <Stack.Screen
           name="checkout"

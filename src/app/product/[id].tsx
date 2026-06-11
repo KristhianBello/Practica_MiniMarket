@@ -1,56 +1,106 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AnimatedPressable } from '@/components/AnimatedPressable';
+import { ImageViewerModal } from '@/components/ImageViewerModal';
+import { ProductDetailsSection } from '@/components/ProductDetailsSection';
 import { AppColors } from '@/constants/colors';
 import { useCart } from '@/context/CartContext';
 import { getProductById } from '@/data/products';
 
+function goToCatalog() {
+  if (router.canGoBack()) {
+    router.back();
+    return;
+  }
+  router.replace('/(tabs)');
+}
+
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { addToCart } = useCart();
+  const { addToCart, getAvailableStock, getCartQuantity } = useCart();
   const product = getProductById(Number(id));
+  const [imageViewerVisible, setImageViewerVisible] = useState(false);
 
   if (!product) {
     return (
       <SafeAreaView style={styles.container}>
         <Text style={styles.error}>Producto no encontrado</Text>
+        <AnimatedPressable style={styles.errorBackButton} onPress={goToCatalog}>
+          <Text style={styles.errorBackText}>Volver al catálogo</Text>
+        </AnimatedPressable>
       </SafeAreaView>
     );
   }
 
-  const outOfStock = product.stock <= 0;
+  const availableStock = getAvailableStock(product.id, product.stock);
+  const inCart = getCartQuantity(product.id);
+  const outOfStock = availableStock <= 0;
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Image source={{ uri: product.image }} style={styles.image} contentFit="cover" />
+        <Animated.View entering={FadeIn.duration(400)}>
+          <Pressable
+            style={styles.imageWrapper}
+            onPress={() => setImageViewerVisible(true)}
+            accessibilityLabel="Ver imagen en tamaño completo"
+            accessibilityRole="button">
+            <Image source={product.image} style={styles.image} contentFit="cover" />
+            <View style={styles.imageOverlay}>
+              <Ionicons name="expand-outline" size={22} color="#FFFFFF" />
+              <Text style={styles.imageOverlayText}>Ver imagen</Text>
+            </View>
+          </Pressable>
+        </Animated.View>
 
-        <View style={styles.details}>
+        <Animated.View
+          entering={FadeInDown.delay(100).duration(400).springify()}
+          style={styles.details}>
           <Text style={styles.category}>{product.category}</Text>
           <Text style={styles.name}>{product.name}</Text>
           <Text style={styles.price}>${product.price.toFixed(2)}</Text>
-          <Text style={styles.stock}>
-            Stock disponible: {product.stock} {product.stock === 1 ? 'unidad' : 'unidades'}
+          <Text style={[styles.stock, outOfStock && styles.stockEmpty]}>
+            Stock disponible: {availableStock}{' '}
+            {availableStock === 1 ? 'unidad' : 'unidades'}
+            {inCart > 0 ? ` · ${inCart} en tu carrito` : ''}
           </Text>
           <Text style={styles.description}>{product.description}</Text>
-        </View>
+
+          <ProductDetailsSection
+            longDescription={product.longDescription}
+            specifications={product.specifications}
+          />
+        </Animated.View>
       </ScrollView>
 
-      <View style={styles.footer}>
-        <Pressable
+      <Animated.View entering={FadeInDown.delay(200).duration(400)} style={styles.footer}>
+        <AnimatedPressable
           style={[styles.button, outOfStock && styles.buttonDisabled]}
           disabled={outOfStock}
+          scaleTo={0.94}
           onPress={() => addToCart(product)}>
           <Text style={styles.buttonText}>
             {outOfStock ? 'Sin stock disponible' : 'Agregar al carrito'}
           </Text>
-        </Pressable>
-        <Pressable style={styles.backLink} onPress={() => router.back()}>
+        </AnimatedPressable>
+        <AnimatedPressable style={styles.backLink} scaleTo={0.98} onPress={goToCatalog}>
+          <Ionicons name="arrow-back" size={18} color={AppColors.primary} />
           <Text style={styles.backLinkText}>Volver al catálogo</Text>
-        </Pressable>
-      </View>
+        </AnimatedPressable>
+      </Animated.View>
+
+      <ImageViewerModal
+        visible={imageViewerVisible}
+        image={product.image}
+        title={product.name}
+        onClose={() => setImageViewerVisible(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -63,10 +113,30 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: 24,
   },
+  imageWrapper: {
+    position: 'relative',
+  },
   image: {
     width: '100%',
     height: 280,
     backgroundColor: AppColors.border,
+  },
+  imageOverlay: {
+    position: 'absolute',
+    bottom: 12,
+    right: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  imageOverlayText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
   },
   details: {
     padding: 20,
@@ -93,6 +163,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: AppColors.textSecondary,
     marginTop: 4,
+  },
+  stockEmpty: {
+    color: AppColors.danger,
+    fontWeight: '600',
   },
   description: {
     fontSize: 15,
@@ -122,17 +196,32 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   backLink: {
-    paddingVertical: 8,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
   },
   backLinkText: {
-    color: AppColors.textSecondary,
-    fontSize: 14,
+    color: AppColors.primary,
+    fontSize: 15,
+    fontWeight: '600',
   },
   error: {
     fontSize: 16,
     color: AppColors.danger,
     textAlign: 'center',
     marginTop: 40,
+  },
+  errorBackButton: {
+    marginTop: 16,
+    alignSelf: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  errorBackText: {
+    color: AppColors.primary,
+    fontSize: 15,
+    fontWeight: '600',
   },
 });

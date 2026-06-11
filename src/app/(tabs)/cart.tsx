@@ -1,11 +1,44 @@
+import { useEffect } from 'react';
 import { router } from 'expo-router';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import Animated, {
+  FadeIn,
+  LinearTransition,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { AnimatedPressable } from '@/components/AnimatedPressable';
 import { CartItemRow } from '@/components/CartItem';
 import { EmptyState } from '@/components/EmptyState';
 import { AppColors } from '@/constants/colors';
 import { useCart } from '@/context/CartContext';
+
+function AnimatedTotal({ total }: { total: number }) {
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+
+  useEffect(() => {
+    scale.value = 0.92;
+    opacity.value = 0.6;
+    scale.value = withSpring(1, { damping: 12, stiffness: 200 });
+    opacity.value = withTiming(1, { duration: 200 });
+  }, [total, scale, opacity]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
+
+  return (
+    <Animated.Text style={[styles.totalAmount, animatedStyle]}>
+      ${total.toFixed(2)}
+    </Animated.Text>
+  );
+}
 
 export default function CartScreen() {
   const {
@@ -30,6 +63,7 @@ export default function CartScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['bottom']}>
         <EmptyState
+          iconName="cart-outline"
           title="Tu carrito está vacío"
           message="Explora el catálogo y agrega productos para comenzar tu compra."
         />
@@ -41,9 +75,10 @@ export default function CartScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <FlatList
+      <Animated.FlatList
         data={cart}
         keyExtractor={(item) => item.id.toString()}
+        itemLayoutAnimation={LinearTransition.springify()}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <CartItemRow
@@ -54,20 +89,22 @@ export default function CartScreen() {
           />
         )}
         ListFooterComponent={
-          <View style={styles.footer}>
+          <Animated.View entering={FadeIn.duration(300)} style={styles.footer}>
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>Total</Text>
-              <Text style={styles.totalAmount}>${total.toFixed(2)}</Text>
+              <AnimatedTotal total={total} />
             </View>
 
-            <Pressable style={styles.checkoutButton} onPress={() => router.push('/checkout')}>
+            <AnimatedPressable
+              style={styles.checkoutButton}
+              onPress={() => router.push('/checkout')}>
               <Text style={styles.checkoutText}>Ir a resumen</Text>
-            </Pressable>
+            </AnimatedPressable>
 
-            <Pressable style={styles.clearButton} onPress={clearCart}>
+            <AnimatedPressable style={styles.clearButton} onPress={clearCart}>
               <Text style={styles.clearText}>Vaciar carrito</Text>
-            </Pressable>
-          </View>
+            </AnimatedPressable>
+          </Animated.View>
         }
       />
     </SafeAreaView>

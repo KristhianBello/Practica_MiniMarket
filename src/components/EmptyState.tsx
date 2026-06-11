@@ -1,19 +1,32 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, Text } from 'react-native';
+import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 
 import { AppColors } from '@/constants/colors';
 
 type EmptyStateProps = {
   title: string;
   message: string;
+  iconName?: keyof typeof Ionicons.glyphMap;
 };
 
-export function EmptyState({ title, message }: EmptyStateProps) {
+export function EmptyState({
+  title,
+  message,
+  iconName = 'cart-outline',
+}: EmptyStateProps) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.icon}>🛒</Text>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.message}>{message}</Text>
-    </View>
+    <Animated.View entering={FadeIn.duration(400)} style={styles.container}>
+      <Animated.View entering={ZoomIn.duration(500).springify()} style={styles.iconWrapper}>
+        <Ionicons name={iconName} size={56} color={AppColors.textSecondary} />
+      </Animated.View>
+      <Animated.Text entering={FadeIn.delay(150).duration(400)} style={styles.title}>
+        {title}
+      </Animated.Text>
+      <Animated.Text entering={FadeIn.delay(250).duration(400)} style={styles.message}>
+        {message}
+      </Animated.Text>
+    </Animated.View>
   );
 }
 
@@ -24,8 +37,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 32,
   },
-  icon: {
-    fontSize: 48,
+  iconWrapper: {
     marginBottom: 16,
   },
   title: {

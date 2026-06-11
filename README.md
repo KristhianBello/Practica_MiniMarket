@@ -217,6 +217,12 @@ El archivo central para explicar en clase es `src/context/CartContext.tsx`.
 
 ---
 
+## Cumplimiento de la rúbrica
+
+Consulta [`RUBRICA.md`](RUBRICA.md) para el checklist completo de criterios, pantallas, funciones del estado y flujo de demostración para la entrega académica.
+
+---
+
 ## Licencia
 
 Proyecto académico — uso educativo.

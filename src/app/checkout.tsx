@@ -1,11 +1,15 @@
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 
+import { AnimatedPressable } from '@/components/AnimatedPressable';
 import { EmptyState } from '@/components/EmptyState';
 import { AppColors } from '@/constants/colors';
 import { useCart } from '@/context/CartContext';
+import { getProductById } from '@/data/products';
 
 export default function CheckoutScreen() {
   const { cart, getTotal, clearCart } = useCart();
@@ -14,6 +18,7 @@ export default function CheckoutScreen() {
     return (
       <SafeAreaView style={styles.container} edges={['bottom']}>
         <EmptyState
+          iconName="receipt-outline"
           title="No hay productos"
           message="Agrega productos al carrito antes de confirmar tu compra."
         />
@@ -30,38 +35,57 @@ export default function CheckoutScreen() {
       text1: '¡Compra confirmada!',
       text2: 'Gracias por tu compra en MiniMarket',
     });
-    router.replace('/');
+    router.replace('/(tabs)');
   };
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.sectionTitle}>Resumen de tu compra</Text>
+      <Animated.ScrollView contentContainerStyle={styles.content}>
+        <Animated.Text entering={FadeIn.duration(300)} style={styles.sectionTitle}>
+          Resumen de tu compra
+        </Animated.Text>
 
-        {cart.map((item) => (
-          <View key={item.id} style={styles.itemRow}>
-            <View style={styles.itemInfo}>
-              <Text style={styles.itemName}>{item.name}</Text>
-              <Text style={styles.itemQty}>
-                {item.quantity} x ${item.price.toFixed(2)}
-              </Text>
-            </View>
-            <Text style={styles.itemSubtotal}>${(item.price * item.quantity).toFixed(2)}</Text>
-          </View>
-        ))}
+        {cart.map((item, index) => {
+          const product = getProductById(item.id);
+          return (
+            <Animated.View
+              key={item.id}
+              entering={FadeInDown.duration(350)
+                .delay(index * 80)
+                .springify()}
+              style={styles.itemRow}>
+              <View style={styles.thumbnailWrapper}>
+                {product ? (
+                  <Image source={product.image} style={styles.thumbnail} contentFit="cover" />
+                ) : (
+                  <View style={styles.thumbnailPlaceholder} />
+                )}
+              </View>
+              <View style={styles.itemInfo}>
+                <Text style={styles.itemName}>{item.name}</Text>
+                <Text style={styles.itemQty}>
+                  {item.quantity} x ${item.price.toFixed(2)}
+                </Text>
+              </View>
+              <Text style={styles.itemSubtotal}>${(item.price * item.quantity).toFixed(2)}</Text>
+            </Animated.View>
+          );
+        })}
 
         <View style={styles.divider} />
 
-        <View style={styles.totalRow}>
+        <Animated.View
+          entering={FadeInDown.delay(cart.length * 80 + 100).springify()}
+          style={styles.totalRow}>
           <Text style={styles.totalLabel}>Total a pagar</Text>
           <Text style={styles.totalAmount}>${total.toFixed(2)}</Text>
-        </View>
-      </ScrollView>
+        </Animated.View>
+      </Animated.ScrollView>
 
       <View style={styles.footer}>
-        <Pressable style={styles.confirmButton} onPress={handleConfirm}>
+        <AnimatedPressable style={styles.confirmButton} onPress={handleConfirm}>
           <Text style={styles.confirmText}>Confirmar compra</Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
     </SafeAreaView>
   );
@@ -83,16 +107,31 @@ const styles = StyleSheet.create({
   },
   itemRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 12,
     backgroundColor: AppColors.card,
-    padding: 16,
+    padding: 12,
     borderRadius: 10,
     marginBottom: 8,
   },
+  thumbnailWrapper: {
+    width: 56,
+    height: 56,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: AppColors.border,
+  },
+  thumbnail: {
+    width: '100%',
+    height: '100%',
+  },
+  thumbnailPlaceholder: {
+    flex: 1,
+    backgroundColor: AppColors.border,
+  },
   itemInfo: {
     flex: 1,
-    marginRight: 12,
+    minWidth: 0,
   },
   itemName: {
     fontSize: 15,

@@ -10,7 +10,7 @@ import { useCart } from '@/context/CartContext';
 import { categories, products } from '@/data/products';
 
 export default function CatalogScreen() {
-  const { addToCart, isLoading } = useCart();
+  const { addToCart, isLoading, cart } = useCart();
   const [selectedCategory, setSelectedCategory] = useState('Todas');
 
   const filteredProducts = useMemo(() => {
@@ -29,7 +29,7 @@ export default function CatalogScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <View style={styles.header}>
-        <Text style={styles.title}>MiniMarket</Text>
+        <Text style={styles.title}>MiniMarket App</Text>
         <Text style={styles.subtitle}>Encuentra los mejores productos</Text>
       </View>
 
@@ -40,14 +40,17 @@ export default function CatalogScreen() {
       />
 
       <FlatList
+        key={selectedCategory}
         data={filteredProducts}
+        extraData={cart}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
         contentContainerStyle={styles.list}
         columnWrapperStyle={styles.row}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <ProductCard
             product={item}
+            index={index}
             onPress={() => router.push(`/product/${item.id}`)}
             onAddToCart={() => addToCart(item)}
           />

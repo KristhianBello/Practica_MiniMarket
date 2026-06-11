@@ -1,6 +1,10 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInRight, FadeOutLeft, Layout } from 'react-native-reanimated';
 
+import { AnimatedPressable } from '@/components/AnimatedPressable';
 import { AppColors } from '@/constants/colors';
+import { getProductById } from '@/data/products';
 import { CartItem } from '@/types';
 
 type CartItemRowProps = {
@@ -12,30 +16,45 @@ type CartItemRowProps = {
 
 export function CartItemRow({ item, onIncrease, onDecrease, onRemove }: CartItemRowProps) {
   const subtotal = item.price * item.quantity;
+  const product = getProductById(item.id);
 
   return (
-    <View style={styles.container}>
+    <Animated.View
+      entering={FadeInRight.duration(300).springify()}
+      exiting={FadeOutLeft.duration(250)}
+      layout={Layout.springify()}
+      style={styles.container}>
+      <View style={styles.thumbnailWrapper}>
+        {product ? (
+          <Image source={product.image} style={styles.thumbnail} contentFit="cover" />
+        ) : (
+          <View style={styles.thumbnailPlaceholder} />
+        )}
+      </View>
+
       <View style={styles.info}>
-        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.name} numberOfLines={2}>
+          {item.name}
+        </Text>
         <Text style={styles.price}>${item.price.toFixed(2)} c/u</Text>
         <Text style={styles.subtotal}>Subtotal: ${subtotal.toFixed(2)}</Text>
       </View>
 
       <View style={styles.actions}>
         <View style={styles.quantityControls}>
-          <Pressable style={styles.qtyButton} onPress={onDecrease}>
+          <AnimatedPressable style={styles.qtyButton} scaleTo={0.9} onPress={onDecrease}>
             <Text style={styles.qtyButtonText}>−</Text>
-          </Pressable>
+          </AnimatedPressable>
           <Text style={styles.quantity}>{item.quantity}</Text>
-          <Pressable style={styles.qtyButton} onPress={onIncrease}>
+          <AnimatedPressable style={styles.qtyButton} scaleTo={0.9} onPress={onIncrease}>
             <Text style={styles.qtyButtonText}>+</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
-        <Pressable style={styles.removeButton} onPress={onRemove}>
+        <AnimatedPressable style={styles.removeButton} scaleTo={0.95} onPress={onRemove}>
           <Text style={styles.removeText}>Eliminar</Text>
-        </Pressable>
+        </AnimatedPressable>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -43,23 +62,39 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: AppColors.card,
     borderRadius: 12,
-    padding: 16,
+    padding: 12,
     marginHorizontal: 16,
     marginBottom: 12,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.06,
     shadowRadius: 4,
     elevation: 2,
   },
+  thumbnailWrapper: {
+    width: 72,
+    height: 72,
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: AppColors.border,
+  },
+  thumbnail: {
+    width: '100%',
+    height: '100%',
+  },
+  thumbnailPlaceholder: {
+    flex: 1,
+    backgroundColor: AppColors.border,
+  },
   info: {
     flex: 1,
-    marginRight: 12,
+    minWidth: 0,
   },
   name: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     color: AppColors.text,
     marginBottom: 4,
@@ -77,16 +112,17 @@ const styles = StyleSheet.create({
   actions: {
     alignItems: 'flex-end',
     justifyContent: 'space-between',
+    alignSelf: 'stretch',
   },
   quantityControls: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
     marginBottom: 8,
   },
   qtyButton: {
-    width: 32,
-    height: 32,
+    width: 30,
+    height: 30,
     borderRadius: 8,
     backgroundColor: AppColors.background,
     borderWidth: 1,
@@ -95,22 +131,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   qtyButtonText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: AppColors.text,
   },
   quantity: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    minWidth: 24,
+    minWidth: 20,
     textAlign: 'center',
   },
   removeButton: {
     paddingVertical: 4,
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
   },
   removeText: {
-    fontSize: 13,
+    fontSize: 12,
     color: AppColors.danger,
     fontWeight: '500',
   },
