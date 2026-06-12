@@ -192,15 +192,62 @@ npm run web       # Expo + Web
 
 ---
 
-## Flujo de demostración
+## Demostración del Problema de Duplicación
 
-1. Agregar un producto desde el catálogo → aparece toast y se actualiza el badge del carrito.
-2. Ir al tab **Carrito** → el producto agregado está visible.
-3. Volver al catálogo y agregar otro producto → el carrito se sincroniza automáticamente.
-4. Filtrar por categoría → solo se muestran productos de esa categoría.
-5. Intentar agregar más unidades que el stock → mensaje de error.
-6. Cerrar y reabrir la app → el carrito persiste gracias a AsyncStorage.
-7. Ir a **Resumen** y confirmar compra → el carrito se limpia.
+Para fines didácticos, hemos introducido un problema común en la gestión del estado: la **duplicación de ítems**.
+
+### El Problema
+
+Si un usuario agrega el mismo producto varias veces, la lógica actual (en `src/context/CartContext.tsx`) crea una nueva entrada en el carrito en lugar de agruparlos por su `id`.
+
+**Consecuencias:**
+- El usuario ve múltiples filas para el mismo producto.
+- El cálculo del total es incorrecto (subtotales erróneos).
+- Mala experiencia de usuario (UX).
+
+### Cómo reproducir
+
+1. En el catálogo, haz clic en el botón de agregar ("+") para un producto (ej. "Audífonos Bluetooth").
+2. Vuelve a hacer clic en el mismo producto.
+3. Ve a la pantalla del **Carrito**.
+4. **Resultado esperado:** Debería haber una sola línea con `cantidad: 2`.
+5. **Resultado actual (bug):** Aparecen dos líneas para el mismo producto, cada una con `cantidad: 1`.
+
+### La Solución
+
+Para corregirlo, debemos centralizar la lógica de agregación en `src/context/CartContext.tsx` utilizando el `id` como identificador único.
+
+**Código Correcto (a restaurar):**
+
+```typescript
+const addToCart = useCallback((product: Product) => {
+  setCart((prev) => {
+    // 1. Verificar si ya existe en el carrito
+    const existing = prev.find((item) => item.id === product.id);
+
+    // 2. Si existe, mapear el arreglo y actualizar cantidad
+    if (existing) {
+      return prev.map((item) =>
+        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
+      );
+    }
+
+    // 3. Si no existe, agregar nueva entrada
+    return [
+      ...prev,
+      {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: 1,
+        stock: product.stock,
+      },
+    ];
+  });
+}, []);
+```
+
+---
 
 ---
 

@@ -66,23 +66,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addToCart = useCallback((product: Product) => {
     setCart((prev) => {
-      const inCart = getCartQuantity(prev, product.id);
-      const available = product.stock - inCart;
-
-      if (available <= 0) {
-        Toast.show({ type: 'error', text1: 'Stock máximo alcanzado' });
-        return prev;
-      }
-
-      const existing = prev.find((item) => item.id === product.id);
-
-      if (existing) {
-        Toast.show({ type: 'success', text1: 'Producto agregado', text2: product.name });
-        return prev.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
-        );
-      }
-
+      // INTENTIONALLY BROKEN: This logic now causes duplicates instead of grouping by ID
       Toast.show({ type: 'success', text1: 'Producto agregado', text2: product.name });
       return [
         ...prev,
