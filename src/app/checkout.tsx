@@ -6,10 +6,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 
 import { AnimatedPressable } from '@/components/AnimatedPressable';
+import { getProductImage } from '@/api/products';
 import { EmptyState } from '@/components/EmptyState';
 import { AppColors } from '@/constants/colors';
 import { useCart } from '@/context/CartContext';
-import { getProductById } from '@/data/products';
 
 export default function CheckoutScreen() {
   const { cart, getTotal, clearCart } = useCart();
@@ -46,7 +46,7 @@ export default function CheckoutScreen() {
         </Animated.Text>
 
         {cart.map((item, index) => {
-          const product = getProductById(item.id);
+          const image = getProductImage(item.imageKey);
           return (
             <Animated.View
               key={item.id}
@@ -55,11 +55,7 @@ export default function CheckoutScreen() {
                 .springify()}
               style={styles.itemRow}>
               <View style={styles.thumbnailWrapper}>
-                {product ? (
-                  <Image source={product.image} style={styles.thumbnail} contentFit="cover" />
-                ) : (
-                  <View style={styles.thumbnailPlaceholder} />
-                )}
+                <Image source={image} style={styles.thumbnail} contentFit="cover" />
               </View>
               <View style={styles.itemInfo}>
                 <Text style={styles.itemName}>{item.name}</Text>

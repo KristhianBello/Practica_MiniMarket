@@ -1,38 +1,80 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { fetchProductById } from '@/api/products';
 import { AnimatedPressable } from '@/components/AnimatedPressable';
 import { ImageViewerModal } from '@/components/ImageViewerModal';
 import { ProductDetailsSection } from '@/components/ProductDetailsSection';
 import { AppColors } from '@/constants/colors';
 import { useCart } from '@/context/CartContext';
-import { getProductById } from '@/data/products';
+import { Product } from '@/types';
 
 function goToCatalog() {
   if (router.canGoBack()) {
     router.back();
     return;
   }
+
   router.replace('/(tabs)');
 }
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { addToCart, getAvailableStock, getCartQuantity } = useCart();
-  const product = getProductById(Number(id));
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
 
-  if (!product) {
+  useEffect(() => {
+    let active = true;
+
+    async function loadProduct() {
+      try {
+        setError('');
+        setIsLoading(true);
+        const data = await fetchProductById(Number(id));
+        if (active) {
+          setProduct(data);
+        }
+      } catch {
+        if (active) {
+          setError('No se pudo cargar el producto desde la API.');
+        }
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadProduct();
+
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
+  if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.error}>Producto no encontrado</Text>
+      <SafeAreaView style={styles.centerContainer}>
+        <ActivityIndicator size="large" color={AppColors.primary} />
+        <Text style={styles.loadingText}>Consultando endpoint del producto...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (!product || error) {
+    return (
+      <SafeAreaView style={styles.centerContainer}>
+        <Text style={styles.error}>{error || 'Producto no encontrado'}</Text>
         <AnimatedPressable style={styles.errorBackButton} onPress={goToCatalog}>
-          <Text style={styles.errorBackText}>Volver al catálogo</Text>
+          <Text style={styles.errorBackText}>Volver al catalogo</Text>
         </AnimatedPressable>
       </SafeAreaView>
     );
@@ -49,7 +91,7 @@ export default function ProductDetailScreen() {
           <Pressable
             style={styles.imageWrapper}
             onPress={() => setImageViewerVisible(true)}
-            accessibilityLabel="Ver imagen en tamaño completo"
+            accessibilityLabel="Ver imagen en tamano completo"
             accessibilityRole="button">
             <Image source={product.image} style={styles.image} contentFit="cover" />
             <View style={styles.imageOverlay}>
@@ -66,10 +108,12 @@ export default function ProductDetailScreen() {
           <Text style={styles.name}>{product.name}</Text>
           <Text style={styles.price}>${product.price.toFixed(2)}</Text>
           <Text style={[styles.stock, outOfStock && styles.stockEmpty]}>
-            Stock disponible: {availableStock}{' '}
-            {availableStock === 1 ? 'unidad' : 'unidades'}
-            {inCart > 0 ? ` · ${inCart} en tu carrito` : ''}
+            Stock disponible: {availableStock} {availableStock === 1 ? 'unidad' : 'unidades'}
+            {inCart > 0 ? ` - ${inCart} en tu carrito` : ''}
           </Text>
+          {product.integrante ? (
+            <Text style={styles.integrante}>Registrado por: {product.integrante}</Text>
+          ) : null}
           <Text style={styles.description}>{product.description}</Text>
 
           <ProductDetailsSection
@@ -91,7 +135,7 @@ export default function ProductDetailScreen() {
         </AnimatedPressable>
         <AnimatedPressable style={styles.backLink} scaleTo={0.98} onPress={goToCatalog}>
           <Ionicons name="arrow-back" size={18} color={AppColors.primary} />
-          <Text style={styles.backLinkText}>Volver al catálogo</Text>
+          <Text style={styles.backLinkText}>Volver al catalogo</Text>
         </AnimatedPressable>
       </Animated.View>
 
@@ -109,6 +153,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: AppColors.background,
+  },
+  centerContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: AppColors.background,
+    padding: 24,
+  },
+  loadingText: {
+    color: AppColors.textSecondary,
+    fontSize: 14,
+    marginTop: 12,
+    textAlign: 'center',
   },
   content: {
     paddingBottom: 24,
@@ -168,6 +225,11 @@ const styles = StyleSheet.create({
     color: AppColors.danger,
     fontWeight: '600',
   },
+  integrante: {
+    color: AppColors.textSecondary,
+    fontSize: 13,
+    fontWeight: '600',
+  },
   description: {
     fontSize: 15,
     color: AppColors.text,
@@ -211,7 +273,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: AppColors.danger,
     textAlign: 'center',
-    marginTop: 40,
   },
   errorBackButton: {
     marginTop: 16,

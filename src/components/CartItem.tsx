@@ -3,8 +3,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInRight, FadeOutLeft, Layout } from 'react-native-reanimated';
 
 import { AnimatedPressable } from '@/components/AnimatedPressable';
+import { getProductImage } from '@/api/products';
 import { AppColors } from '@/constants/colors';
-import { getProductById } from '@/data/products';
 import { CartItem } from '@/types';
 
 type CartItemRowProps = {
@@ -16,7 +16,7 @@ type CartItemRowProps = {
 
 export function CartItemRow({ item, onIncrease, onDecrease, onRemove }: CartItemRowProps) {
   const subtotal = item.price * item.quantity;
-  const product = getProductById(item.id);
+  const image = getProductImage(item.imageKey);
 
   return (
     <Animated.View
@@ -25,11 +25,7 @@ export function CartItemRow({ item, onIncrease, onDecrease, onRemove }: CartItem
       layout={Layout.springify()}
       style={styles.container}>
       <View style={styles.thumbnailWrapper}>
-        {product ? (
-          <Image source={product.image} style={styles.thumbnail} contentFit="cover" />
-        ) : (
-          <View style={styles.thumbnailPlaceholder} />
-        )}
+        <Image source={image} style={styles.thumbnail} contentFit="cover" />
       </View>
 
       <View style={styles.info}>

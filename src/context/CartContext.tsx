@@ -67,13 +67,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addToCart = useCallback((product: Product) => {
     setCart((prev) => {
       // INTENTIONALLY BROKEN: This logic now causes duplicates instead of grouping by ID
-      Toast.show({ type: 'success', text1: 'Producto agregado', text2: product.name });
+ // 1. Verificar si ya existe en el carrito
+    const existing = prev.find((item) => item.id === product.id);
+
+    // 2. Si existe, mapear el arreglo y actualizar cantidad
+    if (existing) {
+      return prev.map((item) =>
+        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
+      );
+    }
       return [
         ...prev,
         {
           id: product.id,
           name: product.name,
           price: product.price,
+          imageKey: product.imageKey,
           quantity: 1,
           stock: product.stock,
         },

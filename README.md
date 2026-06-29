@@ -1,5 +1,50 @@
 # MiniMarket App
 
+## Adaptacion Tema 3.2 - Consumo de servicios web propios
+
+Este proyecto fue adaptado para cumplir el trabajo academico asincronico de la Unidad 3, Tema 3.2: Consumo de Servicios Web Propios.
+
+**Integrantes**
+
+- Cardenas Ávila Emilio Sleimen
+- Anthony Axel Mejia Ordoñez
+- Michael Agustin Intriago Benitez
+- Kristhian Augusto Bello Soledispa
+
+**API propia**
+
+- Carpeta: `api-productos`
+- Recurso principal: `productos`
+- Archivo de datos: `api-productos/db.json`
+- Endpoint base: `http://localhost:3001/productos`
+- En celular fisico usar la IP de la computadora, por ejemplo: `http://192.168.1.10:3001/productos`
+
+**Comandos**
+
+```bash
+npm run api:install
+npm run api
+npm start
+```
+
+Si se prueba en un celular fisico con Expo Go, iniciar la app indicando la URL real de la computadora:
+
+```bash
+EXPO_PUBLIC_API_URL=http://IP_DE_LA_COMPUTADORA:3001 npm start
+```
+
+**Cumplimiento del Tema 3.2**
+
+- `GET /productos`: el catalogo carga los productos desde JSON Server.
+- `GET /productos/:id`: el detalle consulta un producto especifico.
+- `POST /productos`: el formulario del catalogo registra nuevos productos.
+- Manejo de carga: `ActivityIndicator` mientras se consulta la API.
+- Manejo de error: mensaje visible si JSON Server no esta activo o la URL es incorrecta.
+- Actualizacion de datos: pull-to-refresh en el catalogo.
+- Productos propios: `db.json` incluye productos aportados por los integrantes.
+
+---
+
 **Gestión de estado global en una aplicación móvil híbrida de carrito de compras**
 
 Aplicación móvil híbrida desarrollada con React Native y Expo que simula una mini tienda. El objetivo principal no es replicar un e-commerce completo, sino demostrar cómo gestionar **estado compartido entre pantallas**, con persistencia local y sincronización en tiempo real del carrito de compras.
@@ -264,9 +309,6 @@ El archivo central para explicar en clase es `src/context/CartContext.tsx`.
 
 ---
 
-## Cumplimiento de la rúbrica
-
-Consulta [`RUBRICA.md`](RUBRICA.md) para el checklist completo de criterios, pantallas, funciones del estado y flujo de demostración para la entrega académica.
 
 ---
 

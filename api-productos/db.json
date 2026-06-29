@@ -1,0 +1,114 @@
+{
+  "productos": [
+    {
+      "id": "1",
+      "nombre": "Audifonos Bluetooth JBL",
+      "precio": 25,
+      "categoria": "Audio",
+      "stock": 10,
+      "descripcion": "Audifonos inalambricos con buena autonomia y sonido estereo para clases, trabajo y entretenimiento.",
+      "detalle": "Incluyen estuche de carga, conexion Bluetooth 5.0 y cable USB-C.",
+      "integrante": "Cardenas Ávila Emilio Sleimen",
+      "imageKey": "audifonos"
+    },
+    {
+      "id": "2",
+      "nombre": "Mouse inalambrico ergonomico",
+      "precio": 15,
+      "categoria": "Perifericos",
+      "stock": 15,
+      "descripcion": "Mouse recargable con sensor optico de precision y diseno comodo para uso diario.",
+      "detalle": "Compatible con Windows, macOS y equipos moviles mediante receptor USB o Bluetooth.",
+      "integrante": "Anthony Axel Mejia Ordoñez",
+      "imageKey": "mouse"
+    },
+    {
+      "id": "3",
+      "nombre": "Teclado mecanico compacto",
+      "precio": 45,
+      "categoria": "Perifericos",
+      "stock": 8,
+      "descripcion": "Teclado mecanico compacto con iluminacion RGB y switches tactiles para productividad.",
+      "detalle": "Formato TKL, conexion USB-C y teclas resistentes para escritura frecuente.",
+      "integrante": "Michael Agustin Intriago Benitez",
+      "imageKey": "teclado"
+    },
+    {
+      "id": "4",
+      "nombre": "Cargador rapido USB-C 65W",
+      "precio": 12,
+      "categoria": "Accesorios",
+      "stock": 20,
+      "descripcion": "Cargador rapido para celulares, tablets y laptops compatibles con Power Delivery.",
+      "detalle": "Proteccion contra sobrecalentamiento, sobrecarga y cortocircuito.",
+      "integrante": "Kristhian Augusto Bello Soledispa",
+      "imageKey": "cargador"
+    },
+    {
+      "id": "5",
+      "nombre": "Soporte ajustable para celular",
+      "precio": 18,
+      "categoria": "Accesorios",
+      "stock": 12,
+      "descripcion": "Soporte de escritorio con base antideslizante para usar el telefono en vertical u horizontal.",
+      "detalle": "Angulo regulable y estructura estable para videollamadas o estudio.",
+      "integrante": "Cardenas Ávila Emilio Sleimen",
+      "imageKey": "soporte"
+    },
+    {
+      "id": "6",
+      "nombre": "Cable USB-C reforzado",
+      "precio": 7.5,
+      "categoria": "Accesorios",
+      "stock": 18,
+      "descripcion": "Cable resistente para carga y transferencia de datos en dispositivos compatibles.",
+      "detalle": "Cubierta reforzada, conectores firmes y longitud de un metro.",
+      "integrante": "Anthony Axel Mejia Ordoñez",
+      "imageKey": "cargador"
+    },
+    {
+      "id": "7",
+      "nombre": "Pad mouse gamer antideslizante",
+      "precio": 9.99,
+      "categoria": "Perifericos",
+      "stock": 14,
+      "descripcion": "Alfombrilla amplia con superficie suave para mejorar el movimiento del mouse.",
+      "detalle": "Base de goma antideslizante y bordes cosidos para mayor duracion.",
+      "integrante": "Michael Agustin Intriago Benitez",
+      "imageKey": "mouse"
+    },
+    {
+      "id": "8",
+      "nombre": "Mini parlante Bluetooth",
+      "precio": 22.5,
+      "categoria": "Audio",
+      "stock": 9,
+      "descripcion": "Parlante portatil con conexion Bluetooth, bateria recargable y sonido claro.",
+      "detalle": "Ideal para reuniones pequenas, clases practicas y uso personal.",
+      "integrante": "Kristhian Augusto Bello Soledispa",
+      "imageKey": "audifonos"
+    },
+    {
+      "id": "lcIRntCzArs",
+      "nombre": "Teclado gaming 2",
+      "precio": 25,
+      "categoria": "Accesorios",
+      "stock": 1,
+      "descripcion": "Producto agregado desde la app por Cardenas Ávila Emilio Sleimen.",
+      "detalle": "Registro creado con una solicitud POST hacia la API propia JSON Server.",
+      "integrante": "Cardenas Ávila Emilio Sleimen",
+      "imageKey": "soporte"
+    }
+  ],
+  "perfil": {
+    "nombre": "MiniMarket Equipo API Propia",
+    "ciudad": "Manta",
+    "integrantes": [
+      "Cardenas Ávila Emilio Sleimen",
+      "Anthony Axel Mejia Ordoñez",
+      "Michael Agustin Intriago Benitez",
+      "Kristhian Augusto Bello Soledispa"
+    ]
+  },
+  "$schema": "./node_modules/json-server/schema.json"
+}

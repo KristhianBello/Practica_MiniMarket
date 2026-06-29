@@ -11,8 +11,10 @@ export type Product = {
   price: number;
   description: string;
   image: ImageSource;
+  imageKey?: string;
   stock: number;
   category: string;
+  integrante?: string;
   /** Descripción extendida para la sección "Detalles del producto" */
   longDescription?: string;
   /** Especificaciones técnicas (label / value) */
@@ -23,6 +25,7 @@ export type CartItem = {
   id: number;
   name: string;
   price: number;
+  imageKey?: string;
   quantity: number;
   stock: number;
 };
